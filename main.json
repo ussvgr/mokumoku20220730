@@ -1,11 +1,11 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "metadata": {
     "_generator": {
       "name": "bicep",
       "version": "0.8.9.13224",
-      "templateHash": "17293143368384696349"
+      "templateHash": "16236564969438571804"
     }
   },
   "parameters": {
@@ -18,76 +18,13 @@
     },
     "location": {
       "type": "string",
-      "defaultValue": "japaneast",
-      "metadata": {
-        "description": "location for aks cluster"
-      }
-    },
-    "rgName": {
-      "type": "string",
-      "defaultValue": "[format('rg-{0}', parameters('appName'))]"
+      "defaultValue": "[resourceGroup().location]"
     },
     "randomStr": {
       "type": "string"
     },
-    "virtualNetworkName": {
-      "type": "string",
-      "defaultValue": "Vnet"
-    },
-    "AKSsubnetName": {
-      "type": "string",
-      "defaultValue": "AksSubnet"
-    },
-    "DBsubnetName": {
-      "type": "string",
-      "defaultValue": "DbSubnet"
-    },
-    "ACRsubnetName": {
-      "type": "string",
-      "defaultValue": "AcrSubnet"
-    },
-    "KVsubnetName": {
-      "type": "string",
-      "defaultValue": "KvSubnet"
-    },
-    "VMsubnetName": {
-      "type": "string",
-      "defaultValue": "VMSubnet"
-    },
-    "addressPrefix": {
-      "type": "string",
-      "defaultValue": "192.168.0.0/16"
-    },
-    "AKSsubnetPrefix": {
-      "type": "string",
-      "defaultValue": "192.168.0.0/24"
-    },
-    "DBsubnetPrefix": {
-      "type": "string",
-      "defaultValue": "192.168.1.0/24"
-    },
-    "ACRsubnetPrefix": {
-      "type": "string",
-      "defaultValue": "192.168.2.0/24"
-    },
-    "KVsubnetPrefix": {
-      "type": "string",
-      "defaultValue": "192.168.3.0/24"
-    },
-    "VMsubnetPrefix": {
-      "type": "string",
-      "defaultValue": "192.168.254.0/24"
-    },
-    "virtualMachineName": {
-      "type": "string",
-      "defaultValue": "[format('{0}-vm', parameters('appName'))]"
-    },
     "sshPublicKey": {
       "type": "secureString"
-    },
-    "clusterName": {
-      "type": "string",
-      "defaultValue": "[format('{0}-aks', parameters('appName'))]"
     },
     "agentCount": {
       "type": "int",
@@ -97,17 +34,6 @@
       "type": "string",
       "defaultValue": "Standard_ds2_v2"
     },
-    "PrivateCluster": {
-      "type": "bool",
-      "defaultValue": true,
-      "metadata": {
-        "description": "Enable Private Cluster"
-      }
-    },
-    "databaseName": {
-      "type": "string",
-      "defaultValue": "[format('{0}-db-{1}', parameters('appName'), parameters('randomStr'))]"
-    },
     "administratorLogin": {
       "type": "string",
       "defaultValue": "spring"
@@ -115,34 +41,20 @@
     "administratorLoginPassword": {
       "type": "string",
       "defaultValue": "ThisIsTest#123"
-    },
-    "acrName": {
-      "type": "string",
-      "defaultValue": "[format('{0}acr{1}', parameters('appName'), parameters('randomStr'))]"
-    },
-    "keyvaultName": {
-      "type": "string",
-      "defaultValue": "[format('{0}-kv-{1}', parameters('appName'), parameters('randomStr'))]"
-    },
-    "clientIpAddress": {
-      "type": "string"
-    },
-    "userObjectId": {
-      "type": "string"
     }
+  },
+  "variables": {
+    "virtualMachineName": "[format('{0}-vm', parameters('appName'))]",
+    "clusterName": "[format('{0}-aks', parameters('appName'))]",
+    "PrivateCluster": true,
+    "databaseName": "[format('{0}-db-{1}', parameters('appName'), parameters('randomStr'))]",
+    "acrName": "[format('{0}acr{1}', parameters('appName'), parameters('randomStr'))]"
   },
   "resources": [
     {
-      "type": "Microsoft.Resources/resourceGroups",
-      "apiVersion": "2021-01-01",
-      "name": "[parameters('rgName')]",
-      "location": "[parameters('location')]"
-    },
-    {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
-      "name": "[format('{0}-deploy', parameters('virtualNetworkName'))]",
-      "resourceGroup": "[parameters('rgName')]",
+      "name": "Vnet-deploy",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -150,43 +62,43 @@
         "mode": "Incremental",
         "parameters": {
           "virtualNetworkName": {
-            "value": "[parameters('virtualNetworkName')]"
+            "value": "Vnet"
           },
           "location": {
             "value": "[parameters('location')]"
           },
           "addressPrefix": {
-            "value": "[parameters('addressPrefix')]"
+            "value": "192.168.0.0/16"
           },
           "AKSsubnetName": {
-            "value": "[parameters('AKSsubnetName')]"
+            "value": "AksSubnet"
           },
           "AKSsubnetPrefix": {
-            "value": "[parameters('AKSsubnetPrefix')]"
+            "value": "192.168.0.0/24"
           },
           "DBsubnetName": {
-            "value": "[parameters('DBsubnetName')]"
+            "value": "DbSubnet"
           },
           "DBsubnetPrefix": {
-            "value": "[parameters('DBsubnetPrefix')]"
+            "value": "192.168.1.0/24"
           },
           "ACRsubnetName": {
-            "value": "[parameters('ACRsubnetName')]"
+            "value": "AcrSubnet"
           },
           "ACRsubnetPrefix": {
-            "value": "[parameters('ACRsubnetPrefix')]"
+            "value": "192.168.2.0/24"
           },
           "KVsubnetName": {
-            "value": "[parameters('KVsubnetName')]"
+            "value": "KvSubnet"
           },
           "KVsubnetPrefix": {
-            "value": "[parameters('KVsubnetPrefix')]"
+            "value": "192.168.3.0/24"
           },
           "VMsubnetName": {
-            "value": "[parameters('VMsubnetName')]"
+            "value": "VMSubnet"
           },
           "VMsubnetPrefix": {
-            "value": "[parameters('VMsubnetPrefix')]"
+            "value": "192.168.254.0/24"
           }
         },
         "template": {
@@ -301,16 +213,12 @@
             }
           ]
         }
-      },
-      "dependsOn": [
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('rgName'))]"
-      ]
+      }
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
-      "name": "[format('{0}-deploy', parameters('virtualMachineName'))]",
-      "resourceGroup": "[parameters('rgName')]",
+      "name": "[format('{0}-deploy', variables('virtualMachineName'))]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -318,16 +226,16 @@
         "mode": "Incremental",
         "parameters": {
           "virtualMachineName": {
-            "value": "[parameters('virtualMachineName')]"
+            "value": "[format('{0}-vm', parameters('appName'))]"
           },
           "location": {
             "value": "[parameters('location')]"
           },
           "virtualNetworkName": {
-            "value": "[parameters('virtualNetworkName')]"
+            "value": "Vnet"
           },
           "subnetName": {
-            "value": "[parameters('VMsubnetName')]"
+            "value": "VMSubnet"
           },
           "sshPublicKey": {
             "value": "[parameters('sshPublicKey')]"
@@ -552,15 +460,13 @@
         }
       },
       "dependsOn": [
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('rgName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('rgName')), 'Microsoft.Resources/deployments', format('{0}-deploy', parameters('virtualNetworkName')))]"
+        "[resourceId('Microsoft.Resources/deployments', 'Vnet-deploy')]"
       ]
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
-      "name": "[format('{0}-deploy', parameters('clusterName'))]",
-      "resourceGroup": "[parameters('rgName')]",
+      "name": "[format('{0}-deploy', variables('clusterName'))]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -568,16 +474,16 @@
         "mode": "Incremental",
         "parameters": {
           "clusterName": {
-            "value": "[parameters('clusterName')]"
+            "value": "[variables('clusterName')]"
           },
           "location": {
             "value": "[parameters('location')]"
           },
           "virtualNetworkName": {
-            "value": "[parameters('virtualNetworkName')]"
+            "value": "Vnet"
           },
           "AKSsubnetName": {
-            "value": "[parameters('AKSsubnetName')]"
+            "value": "AksSubnet"
           },
           "agentCount": {
             "value": "[parameters('agentCount')]"
@@ -586,10 +492,10 @@
             "value": "[parameters('agentVMSize')]"
           },
           "PrivateCluster": {
-            "value": "[parameters('PrivateCluster')]"
+            "value": "[variables('PrivateCluster')]"
           },
           "virtualMachineName": {
-            "value": "[parameters('virtualMachineName')]"
+            "value": "[variables('virtualMachineName')]"
           }
         },
         "template": {
@@ -733,63 +639,14 @@
         }
       },
       "dependsOn": [
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('rgName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('rgName')), 'Microsoft.Resources/deployments', format('{0}-deploy', parameters('virtualMachineName')))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('rgName')), 'Microsoft.Resources/deployments', format('{0}-deploy', parameters('virtualNetworkName')))]"
+        "[resourceId('Microsoft.Resources/deployments', format('{0}-deploy', variables('virtualMachineName')))]",
+        "[resourceId('Microsoft.Resources/deployments', 'Vnet-deploy')]"
       ]
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
-      "name": "[format('{0}-managed-id-for-keyvault', parameters('clusterName'))]",
-      "resourceGroup": "[format('MC_{0}_{1}_{2}', parameters('rgName'), parameters('clusterName'), parameters('location'))]",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "clusterName": {
-            "value": "[parameters('clusterName')]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.8.9.13224",
-              "templateHash": "18290799224780313948"
-            }
-          },
-          "parameters": {
-            "clusterName": {
-              "type": "string"
-            }
-          },
-          "resources": [],
-          "outputs": {
-            "principalIdForKeyVault": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('azurekeyvaultsecretsprovider-{0}', parameters('clusterName'))), '2018-11-30').principalId]"
-            },
-            "managedIdForSecretStoreCsiDriver": {
-              "type": "string",
-              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', format('azurekeyvaultsecretsprovider-{0}', parameters('clusterName'))), '2018-11-30').clientId]"
-            }
-          }
-        }
-      },
-      "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('rgName')), 'Microsoft.Resources/deployments', format('{0}-deploy', parameters('clusterName')))]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2020-10-01",
-      "name": "[format('{0}-deploy', parameters('databaseName'))]",
-      "resourceGroup": "[parameters('rgName')]",
+      "name": "[format('{0}-deploy', variables('databaseName'))]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -797,16 +654,16 @@
         "mode": "Incremental",
         "parameters": {
           "databaseName": {
-            "value": "[parameters('databaseName')]"
+            "value": "[variables('databaseName')]"
           },
           "location": {
             "value": "[parameters('location')]"
           },
           "virtualNetworkName": {
-            "value": "[parameters('virtualNetworkName')]"
+            "value": "Vnet"
           },
           "subnetName": {
-            "value": "[parameters('DBsubnetName')]"
+            "value": "DbSubnet"
           },
           "administratorLogin": {
             "value": "[parameters('administratorLogin')]"
@@ -927,15 +784,13 @@
         }
       },
       "dependsOn": [
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('rgName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('rgName')), 'Microsoft.Resources/deployments', format('{0}-deploy', parameters('virtualNetworkName')))]"
+        "[resourceId('Microsoft.Resources/deployments', 'Vnet-deploy')]"
       ]
     },
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-10-01",
-      "name": "[format('{0}-deploy', parameters('acrName'))]",
-      "resourceGroup": "[parameters('rgName')]",
+      "name": "[format('{0}-deploy', variables('acrName'))]",
       "properties": {
         "expressionEvaluationOptions": {
           "scope": "inner"
@@ -943,22 +798,22 @@
         "mode": "Incremental",
         "parameters": {
           "acrName": {
-            "value": "[parameters('acrName')]"
+            "value": "[variables('acrName')]"
           },
           "location": {
             "value": "[parameters('location')]"
           },
           "virtualNetworkName": {
-            "value": "[parameters('virtualNetworkName')]"
+            "value": "Vnet"
           },
           "subnetName": {
-            "value": "[parameters('ACRsubnetName')]"
+            "value": "AcrSubnet"
           },
           "clusterName": {
-            "value": "[parameters('clusterName')]"
+            "value": "[variables('clusterName')]"
           },
           "virtualMachineName": {
-            "value": "[parameters('virtualMachineName')]"
+            "value": "[variables('virtualMachineName')]"
           }
         },
         "template": {
@@ -1123,264 +978,9 @@
         }
       },
       "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('rgName')), 'Microsoft.Resources/deployments', format('{0}-deploy', parameters('clusterName')))]",
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('rgName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('rgName')), 'Microsoft.Resources/deployments', format('{0}-deploy', parameters('virtualNetworkName')))]"
-      ]
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2020-10-01",
-      "name": "[format('{0}-deploy', parameters('keyvaultName'))]",
-      "resourceGroup": "[parameters('rgName')]",
-      "properties": {
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "mode": "Incremental",
-        "parameters": {
-          "keyvaultName": {
-            "value": "[parameters('keyvaultName')]"
-          },
-          "location": {
-            "value": "[parameters('location')]"
-          },
-          "virtualNetworkName": {
-            "value": "[parameters('virtualNetworkName')]"
-          },
-          "subnetName": {
-            "value": "[parameters('KVsubnetName')]"
-          },
-          "clientIpAddress": {
-            "value": "[parameters('clientIpAddress')]"
-          },
-          "managedIdForKeyVault": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('MC_{0}_{1}_{2}', parameters('rgName'), parameters('clusterName'), parameters('location'))), 'Microsoft.Resources/deployments', format('{0}-managed-id-for-keyvault', parameters('clusterName')))).outputs.principalIdForKeyVault.value]"
-          },
-          "virtualMachineName": {
-            "value": "[parameters('virtualMachineName')]"
-          },
-          "userObjectId": {
-            "value": "[parameters('userObjectId')]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "metadata": {
-            "_generator": {
-              "name": "bicep",
-              "version": "0.8.9.13224",
-              "templateHash": "6046826169869842828"
-            }
-          },
-          "parameters": {
-            "keyvaultName": {
-              "type": "string"
-            },
-            "location": {
-              "type": "string"
-            },
-            "virtualNetworkName": {
-              "type": "string"
-            },
-            "subnetName": {
-              "type": "string"
-            },
-            "sku": {
-              "type": "string",
-              "defaultValue": "premium"
-            },
-            "clientIpAddress": {
-              "type": "string"
-            },
-            "managedIdForKeyVault": {
-              "type": "string"
-            },
-            "virtualMachineName": {
-              "type": "string"
-            },
-            "userObjectId": {
-              "type": "string"
-            }
-          },
-          "variables": {
-            "roleSecretsUser": "4633458b-17de-408a-b874-0445c86b69e6",
-            "roleSecretsOfficer": "b86a8fe4-44ce-4948-aee5-eccb2c155cd7"
-          },
-          "resources": [
-            {
-              "type": "Microsoft.Network/privateDnsZones",
-              "apiVersion": "2020-06-01",
-              "name": "privatelink.vaultcore.azure.net",
-              "location": "global"
-            },
-            {
-              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
-              "apiVersion": "2020-06-01",
-              "name": "[format('{0}/{1}', 'privatelink.vaultcore.azure.net', format('{0}-link', 'privatelink.vaultcore.azure.net'))]",
-              "location": "global",
-              "properties": {
-                "registrationEnabled": false,
-                "virtualNetwork": {
-                  "id": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.vaultcore.azure.net')]"
-              ]
-            },
-            {
-              "type": "Microsoft.KeyVault/vaults",
-              "apiVersion": "2021-10-01",
-              "name": "[parameters('keyvaultName')]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "tenantId": "[tenant().tenantId]",
-                "enableRbacAuthorization": true,
-                "networkAcls": {
-                  "bypass": "None",
-                  "defaultAction": "Deny",
-                  "ipRules": [
-                    {
-                      "value": "[parameters('clientIpAddress')]"
-                    }
-                  ]
-                },
-                "sku": {
-                  "family": "A",
-                  "name": "[parameters('sku')]"
-                }
-              }
-            },
-            {
-              "type": "Microsoft.Network/privateEndpoints",
-              "apiVersion": "2021-05-01",
-              "name": "[format('{0}-pe', parameters('keyvaultName'))]",
-              "location": "[parameters('location')]",
-              "properties": {
-                "privateLinkServiceConnections": [
-                  {
-                    "name": "[format('{0}-plink', parameters('keyvaultName'))]",
-                    "properties": {
-                      "groupIds": [
-                        "vault"
-                      ],
-                      "privateLinkServiceId": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
-                    }
-                  }
-                ],
-                "subnet": {
-                  "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', split(format('{0}/{1}', parameters('virtualNetworkName'), parameters('subnetName')), '/')[0], split(format('{0}/{1}', parameters('virtualNetworkName'), parameters('subnetName')), '/')[1])]"
-                }
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
-              "apiVersion": "2021-05-01",
-              "name": "[format('{0}/{1}', format('{0}-pe', parameters('keyvaultName')), format('{0}-pe-dnszone', parameters('keyvaultName')))]",
-              "properties": {
-                "privateDnsZoneConfigs": [
-                  {
-                    "name": "privatelink.vaultcore.azure.net",
-                    "properties": {
-                      "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.vaultcore.azure.net')]"
-                    }
-                  }
-                ]
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.vaultcore.azure.net')]",
-                "[resourceId('Microsoft.Network/privateDnsZones/virtualNetworkLinks', 'privatelink.vaultcore.azure.net', format('{0}-link', 'privatelink.vaultcore.azure.net'))]",
-                "[resourceId('Microsoft.Network/privateEndpoints', format('{0}-pe', parameters('keyvaultName')))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2020-04-01-preview",
-              "scope": "[format('Microsoft.KeyVault/vaults/{0}', parameters('keyvaultName'))]",
-              "name": "[guid(resourceGroup().id, parameters('keyvaultName'), parameters('managedIdForKeyVault'), 'AssignSecretsUserToAks')]",
-              "properties": {
-                "description": "Assign Key Vault Secrets User role to AKS",
-                "principalId": "[parameters('managedIdForKeyVault')]",
-                "principalType": "ServicePrincipal",
-                "roleDefinitionId": "[format('/subscriptions/{0}/providers/Microsoft.Authorization/roleDefinitions/{1}', subscription().subscriptionId, variables('roleSecretsUser'))]"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2020-04-01-preview",
-              "scope": "[format('Microsoft.KeyVault/vaults/{0}', parameters('keyvaultName'))]",
-              "name": "[guid(resourceGroup().id, parameters('keyvaultName'), resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName')), 'AssignSecretsOfficerToVM')]",
-              "properties": {
-                "description": "Assign Key Vault Secrets Officer role to VM",
-                "principalId": "[reference(resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachineName')), '2020-06-01', 'full').identity.principalId]",
-                "principalType": "ServicePrincipal",
-                "roleDefinitionId": "[format('/subscriptions/{0}/providers/Microsoft.Authorization/roleDefinitions/{1}', subscription().subscriptionId, variables('roleSecretsOfficer'))]"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
-              ]
-            },
-            {
-              "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2020-04-01-preview",
-              "scope": "[format('Microsoft.KeyVault/vaults/{0}', parameters('keyvaultName'))]",
-              "name": "[guid(resourceGroup().id, parameters('keyvaultName'), parameters('userObjectId'), 'AssignSecretsOfficerToUser')]",
-              "properties": {
-                "description": "Assign Key Vault Secrets Officer role to User",
-                "principalId": "[parameters('userObjectId')]",
-                "principalType": "User",
-                "roleDefinitionId": "[format('/subscriptions/{0}/providers/Microsoft.Authorization/roleDefinitions/{1}', subscription().subscriptionId, variables('roleSecretsOfficer'))]"
-              },
-              "dependsOn": [
-                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyvaultName'))]"
-              ]
-            }
-          ]
-        }
-      },
-      "dependsOn": [
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('MC_{0}_{1}_{2}', parameters('rgName'), parameters('clusterName'), parameters('location'))), 'Microsoft.Resources/deployments', format('{0}-managed-id-for-keyvault', parameters('clusterName')))]",
-        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('rgName'))]",
-        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('rgName')), 'Microsoft.Resources/deployments', format('{0}-deploy', parameters('virtualNetworkName')))]"
+        "[resourceId('Microsoft.Resources/deployments', format('{0}-deploy', variables('clusterName')))]",
+        "[resourceId('Microsoft.Resources/deployments', 'Vnet-deploy')]"
       ]
     }
-  ],
-  "outputs": {
-    "sshCommand": {
-      "type": "string",
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('rgName')), 'Microsoft.Resources/deployments', format('{0}-deploy', parameters('virtualMachineName')))).outputs.sshCommand.value]"
-    },
-    "aksGetCredentialsCommand": {
-      "type": "string",
-      "value": "[format('az aks get-credentials -g {0} -n {1}', parameters('rgName'), parameters('clusterName'))]"
-    },
-    "ACRNAME": {
-      "type": "string",
-      "value": "[parameters('acrName')]"
-    },
-    "KEYVAULTNAME": {
-      "type": "string",
-      "value": "[parameters('keyvaultName')]"
-    },
-    "DATABASENAME": {
-      "type": "string",
-      "value": "[parameters('databaseName')]"
-    },
-    "MANAGEDID": {
-      "type": "string",
-      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, format('MC_{0}_{1}_{2}', parameters('rgName'), parameters('clusterName'), parameters('location'))), 'Microsoft.Resources/deployments', format('{0}-managed-id-for-keyvault', parameters('clusterName')))).outputs.managedIdForSecretStoreCsiDriver.value]"
-    },
-    "TENANTID": {
-      "type": "string",
-      "value": "[tenant().tenantId]"
-    }
-  }
+  ]
 }

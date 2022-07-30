@@ -1,86 +1,57 @@
-targetScope='subscription'
+targetScope = 'resourceGroup'
 
 // references
 @description('Application name')
 param appName string = 'mokumoku20220730'
-@description('location for aks cluster')
-param location string = 'japaneast'
-param rgName string = 'rg-${appName}'
+param location string = resourceGroup().location
+
 param randomStr string
 
-// Network Settings
-param virtualNetworkName string = 'Vnet'
-param AKSsubnetName string = 'AksSubnet'
-param DBsubnetName string = 'DbSubnet'
-param ACRsubnetName string = 'AcrSubnet'
-param KVsubnetName string = 'KvSubnet'
-param VMsubnetName string = 'VMSubnet'
-param addressPrefix string = '192.168.0.0/16'
-param AKSsubnetPrefix string = '192.168.0.0/24'
-param DBsubnetPrefix string = '192.168.1.0/24'
-param ACRsubnetPrefix string = '192.168.2.0/24'
-param KVsubnetPrefix string = '192.168.3.0/24'
-param VMsubnetPrefix string = '192.168.254.0/24'
-
 // VM Settings
-param virtualMachineName string = '${appName}-vm'
 @secure()
 param sshPublicKey string
+var virtualMachineName = '${appName}-vm'
 
 // AKS Settings
-param clusterName string = '${appName}-aks'
 param agentCount int = 1
 param agentVMSize string = 'Standard_ds2_v2'
-@description('Enable Private Cluster')
-param PrivateCluster bool = true
+var clusterName = '${appName}-aks'
+var PrivateCluster = true
 
 // DB Settings
-param databaseName string = '${appName}-db-${randomStr}'
 param administratorLogin string = 'spring'
 param administratorLoginPassword string = 'ThisIsTest#123'
+var databaseName = '${appName}-db-${randomStr}'
 
 // ACR Settings
-param acrName string = '${appName}acr${randomStr}'
-
-// Key Vault Settings
-param keyvaultName string = '${appName}-kv-${randomStr}'
-param clientIpAddress string
-param userObjectId string
-
-resource rg 'Microsoft.Resources/resourceGroups@2021-01-01' = {
-  name: rgName
-  location: location
-}
+var acrName = '${appName}acr${randomStr}'
 
 module vnet 'modules/network.bicep' = {
-  name: '${virtualNetworkName}-deploy'
-  scope: rg
+  name: 'Vnet-deploy'
   params: {
-    virtualNetworkName: virtualNetworkName
+    virtualNetworkName: 'Vnet'
     location: location
-    addressPrefix: addressPrefix
-    AKSsubnetName: AKSsubnetName
-    AKSsubnetPrefix: AKSsubnetPrefix
-    DBsubnetName: DBsubnetName
-    DBsubnetPrefix: DBsubnetPrefix
-    ACRsubnetName: ACRsubnetName
-    ACRsubnetPrefix: ACRsubnetPrefix
-    KVsubnetName: KVsubnetName
-    KVsubnetPrefix: KVsubnetPrefix
-    VMsubnetName: VMsubnetName
-    VMsubnetPrefix: VMsubnetPrefix
+    addressPrefix: '192.168.0.0/16'
+    AKSsubnetName: 'AksSubnet'
+    AKSsubnetPrefix: '192.168.0.0/24'
+    DBsubnetName: 'DbSubnet'
+    DBsubnetPrefix: '192.168.1.0/24'
+    ACRsubnetName: 'AcrSubnet'
+    ACRsubnetPrefix: '192.168.2.0/24'
+    KVsubnetName: 'KvSubnet'
+    KVsubnetPrefix: '192.168.3.0/24'
+    VMsubnetName: 'VMSubnet'
+    VMsubnetPrefix: '192.168.254.0/24'
   }
 }
 
-
 module vm 'modules/linux-vm.bicep' = {
   name: '${virtualMachineName}-deploy'
-  scope: rg
   params: {
-    virtualMachineName: virtualMachineName
+    virtualMachineName: '${appName}-vm'
     location: location
-    virtualNetworkName: virtualNetworkName
-    subnetName: VMsubnetName
+    virtualNetworkName: 'Vnet'
+    subnetName: 'VMSubnet'
     sshPublicKey: sshPublicKey
   }
   dependsOn: [
@@ -90,12 +61,11 @@ module vm 'modules/linux-vm.bicep' = {
 
 module aks 'modules/aks.bicep' = {
   name: '${clusterName}-deploy'
-  scope: rg
   params: {
     clusterName: clusterName
     location: location
-    virtualNetworkName: virtualNetworkName
-    AKSsubnetName: AKSsubnetName
+    virtualNetworkName: 'Vnet'
+    AKSsubnetName: 'AksSubnet'
     agentCount: agentCount
     agentVMSize: agentVMSize
     PrivateCluster: PrivateCluster
@@ -107,30 +77,13 @@ module aks 'modules/aks.bicep' = {
   ]
 }
 
-
-resource aksworkerrg 'Microsoft.Resources/resourceGroups@2021-01-01' existing = {
-  name: 'MC_${rgName}_${clusterName}_${location}'
-}
-
-module md_id 'modules/md_id.bicep' = {
-  name: '${clusterName}-managed-id-for-keyvault'
-  scope: aksworkerrg
-  params: {
-    clusterName: clusterName
-  }
-  dependsOn: [
-    aks
-  ]
-}
-
 module db 'modules/postgresql.bicep' = {
   name: '${databaseName}-deploy' 
-  scope: rg
   params: {
     databaseName: databaseName
     location: location
-    virtualNetworkName: virtualNetworkName
-    subnetName: DBsubnetName
+    virtualNetworkName: 'Vnet'
+    subnetName: 'DbSubnet'
     administratorLogin: administratorLogin
     administratorLoginPassword: administratorLoginPassword
   }
@@ -141,12 +94,11 @@ module db 'modules/postgresql.bicep' = {
 
 module acr 'modules/acr.bicep' = {
   name: '${acrName}-deploy'
-  scope: rg
   params: {
     acrName: acrName
     location: location
-    virtualNetworkName: virtualNetworkName
-    subnetName: ACRsubnetName
+    virtualNetworkName: 'Vnet'
+    subnetName: 'AcrSubnet'
     clusterName: clusterName
     virtualMachineName: virtualMachineName
   }
@@ -155,30 +107,3 @@ module acr 'modules/acr.bicep' = {
     aks
   ]
 }
-
-module keyvault 'modules/keyvault.bicep' = {
-  name: '${keyvaultName}-deploy'
-  scope: rg
-  params: {
-    keyvaultName: keyvaultName
-    location: location
-    virtualNetworkName: virtualNetworkName
-    subnetName: KVsubnetName
-    clientIpAddress: clientIpAddress
-    managedIdForKeyVault: md_id.outputs.principalIdForKeyVault
-    virtualMachineName: virtualMachineName
-    userObjectId: userObjectId
-  }
-  dependsOn: [
-    vnet
-    md_id
-  ]
-}
-
-output sshCommand string = vm.outputs.sshCommand
-output aksGetCredentialsCommand string = 'az aks get-credentials -g ${rgName} -n ${clusterName}'
-output ACRNAME string = acrName
-output KEYVAULTNAME string = keyvaultName
-output DATABASENAME string = databaseName
-output MANAGEDID string = md_id.outputs.managedIdForSecretStoreCsiDriver
-output TENANTID string = az.tenant().tenantId

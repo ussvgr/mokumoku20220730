@@ -1,0 +1,118 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2021-09-09/uiFormDefinition.schema.json#",
+    "view": {
+        "kind": "Form",
+        "properties": {
+            "title": "テンプレートを展開する",
+            "steps": [
+                {
+                    "name": "basics",
+                    "label": "基本情報の設定",
+                    "description": "展開",
+                    "elements": [
+                        {
+                            "name": "resourceScope",
+                            "type": "Microsoft.Common.ResourceScope"
+                        },
+                        {
+                            "name": "txtAppName",
+                            "type": "Microsoft.Common.TextBox",
+                            "label": "デプロイする各リソースに付与するプレフィックス名",
+                            "defaultValue": "mokumoku20220730",
+                            "toolTip": "",
+                            "multiLine": false,
+                            "constraints": {
+                                "required": true
+                            },
+                            "visible": true
+                        },
+                        {
+                            "name": "txtRandomStr",
+                            "type": "Microsoft.Common.TextBox",
+                            "label": "DBとACRの名前末尾に付与する文字列",
+                            "defaultValue": "",
+                            "toolTip": "",
+                            "multiLine": false,
+                            "constraints": {
+                                "required": true
+                            },
+                            "visible": true
+                        },
+                        {
+                            "name": "numAgentCount",
+                            "type": "Microsoft.Common.Slider",
+                            "min": 1,
+                            "max": 10,
+                            "label": "AKSのエージェントノード数",
+                            "defaultValue": 1,
+                            "toolTip": "",
+                            "showStepMarkers": true,
+                            "constraints": {
+                                "required": true
+                            },
+                            "visible": true
+                        },
+                        {
+                            "name": "txtAdministratorLogin",
+                            "type": "Microsoft.Common.TextBox",
+                            "label": "DBの管理者ID",
+                            "defaultValue": "spring",
+                            "toolTip": "",
+                            "multiLine": false,
+                            "constraints": {
+                                "required": true
+                            },
+                            "visible": true
+                        },
+                        {
+                            "name": "txtAdministratorLoginPassword",
+                            "type": "Microsoft.Common.PasswordBox",
+                            "label": {
+                                "password": "DBのパスワード",
+                                "confirmPassword": "確認のため再入力"
+                            },
+                            "toolTip": "",
+                            "multiLine": false,
+                            "constraints": {
+                                "required": true,
+                                "regex": "^[a-zA-Z0-9]{8,}$",
+                                "validationMessage": "Password must be at least 8 characters long, contain only numbers and letters"
+                            },
+                            "options": {
+                                "hideConfirmation": false
+                            },
+                            "visible": true
+                        },
+                        {
+                            "name": "txtSshPublicKey",
+                            "type": "Microsoft.Common.TextBox",
+                            "label": "踏み台VMのSSH公開鍵",
+                            "defaultValue": "",
+                            "toolTip": "",
+                            "multiLine": true,
+                            "constraints": {
+                                "required": true
+                            },
+                            "visible": true
+                        }
+                    ]
+                }
+            ]
+        },
+        "outputs": {
+            "parameters": {
+                "appName": "[steps('basics').txtAppName]",
+                "location": "[steps('basics').resourceScope.location.name]",
+                "randomStr": "[steps('basics').txtRandomStr]",
+                "sshPublicKey": "[steps('basics').txtSshPublicKey]",
+                "agentCount": "[steps('basics').numAgentCount]",
+                "agentVMSize": "Standard_ds2_v2",
+                "administratorLogin": "[steps('basics').txtAdministratorLogin]",
+                "administratorLoginPassword": "[steps('basics').txtAdministratorLoginPassword]"
+            },
+            "kind": "ResourceGroup",
+            "resourceGroupId": "[steps('basics').resourceScope.resourceGroup.id]",
+            "location": "[steps('basics').resourceScope.location.name]"
+        }
+    }
+}
